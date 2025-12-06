@@ -1,0 +1,45 @@
+{
+  "name": "ai-coworking",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@ai-sdk/groq": "^2.0.32",
+    "@ai-sdk/openai": "^2.0.76",
+    "ai": "^5.0.106",
+    "diff-match-patch": "^1.0.5",
+    "next": "16.0.6",
+    "prosemirror-commands": "^1.7.1",
+    "prosemirror-example-setup": "^1.2.3",
+    "prosemirror-history": "^1.5.0",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-markdown": "^1.13.2",
+    "prosemirror-model": "^1.25.4",
+    "prosemirror-schema-basic": "^1.2.4",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.41.4",
+    "quill": "^2.0.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "y-quill": "^1.0.0",
+    "yjs": "^13.6.27"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/diff-match-patch": "^1.0.36",
+    "@types/node": "^20",
+    "@types/quill": "^2.0.14",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

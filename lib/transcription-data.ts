@@ -1,0 +1,23 @@
+export const TRANSCRIPTION_BLOCKS = [
+    "Speaker A: Alright, let's get started. The main goal of this meeting is to discuss the Q4 roadmap.",
+    "Speaker B: I've prepared the initial draft. We need to focus on the mobile app redesign.",
+    "Speaker A: Agreed. The current UI is outdated. What are the key areas we want to improve?",
+    "Speaker B: Navigation is the biggest pain point. Users are getting lost in the settings menu.",
+    "Speaker C: I also think we should look at the onboarding flow. Drop-off rates are high there.",
+    "Speaker A: Good point. Let's add 'Revamp Onboarding' to the high-priority list.",
+    "Speaker B: For the navigation, I suggest moving to a bottom tab bar instead of the hamburger menu.",
+    "Speaker C: That works for mobile, but what about the tablet view?",
+    "Speaker B: We can use a sidebar for tablet. It's a common pattern.",
+    "Speaker A: Okay, let's settle on Bottom Tabs for Mobile, Sidebar for Tablet.",
+    "Speaker A: Moving on to performance. The app load time is still around 3 seconds.",
+    "Speaker C: We can optimize the image assets and lazy load the non-critical components.",
+    "Speaker B: I can take lead on the performance optimization task.",
+    "Speaker A: Great. Let's aim for under 1.5 seconds load time.",
+    "Speaker C: What about the new feature request? The dark mode support?",
+    "Speaker B: It's highly requested, but it might take a significant effort to refactor the styles.",
+    "Speaker A: Let's put Dark Mode in the 'Nice to Have' bucket for now. We can revisit it if we have time.",
+    "Speaker C: Understood. I'll focus on the onboarding flow then.",
+    "Speaker A: So to recap: Mobile Redesign (Navigation), Onboarding Improvements, and Performance Optimization are the P0s.",
+    "Speaker B: And Dark Mode is P1/P2.",
+    "Speaker A: Correct. Let's meet again next week to review the designs."
+];
