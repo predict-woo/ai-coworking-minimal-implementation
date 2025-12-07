@@ -1,13 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import { EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { schema, defaultMarkdownParser, defaultMarkdownSerializer } from 'prosemirror-markdown';
-import { exampleSetup } from 'prosemirror-example-setup';
-import 'prosemirror-view/style/prosemirror.css';
-import 'prosemirror-menu/style/menu.css';
-import 'prosemirror-example-setup/style/style.css';
+import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } from 'react';
+import { Crepe } from '@milkdown/crepe';
+import { replaceAll, insert } from '@milkdown/kit/utils';
+import '@milkdown/crepe/theme/common/style.css';
+import '@milkdown/crepe/theme/frame.css';
 import './editor.css';
 
 interface EditorProps {
@@ -22,140 +19,89 @@ export interface EditorRef {
 }
 
 const Editor = forwardRef<EditorRef, EditorProps>(({ initialContent = '', onChange }, ref) => {
-    const editorRef = useRef<HTMLDivElement>(null);
-    const viewRef = useRef<EditorView | null>(null);
+    const editorContainerRef = useRef<HTMLDivElement>(null);
+    const crepeRef = useRef<Crepe | null>(null);
     const isUpdatingRef = useRef(false);
+    const [isReady, setIsReady] = useState(false);
 
     useImperativeHandle(ref, () => ({
         updateContent: (markdown: string) => {
-            if (!viewRef.current) return;
+            if (!crepeRef.current || !isReady) return;
             
             // Prevent feedback loop if we are updating from outside
             isUpdatingRef.current = true;
             
-            const view = viewRef.current;
-            const state = view.state;
-            const newDoc = defaultMarkdownParser.parse(markdown);
-            
-            // Check if we have focus before update
-            const hasFocus = view.hasFocus();
-            
-            // Create a transaction to replace content
-            // We replace the entire document content with the new parsed content
-            const tr = state.tr.replaceWith(0, state.doc.content.size, newDoc);
-            
-            // Don't add to history for external updates to avoid polluting undo stack
-            tr.setMeta('addToHistory', false);
-            
-            view.dispatch(tr);
-            
-            // Restore focus if we had it
-            if (hasFocus) {
-                view.focus();
+            try {
+                // Use the replaceAll macro to replace all content
+                crepeRef.current.editor.action(replaceAll(markdown));
+            } catch (error) {
+                console.error('Error updating content:', error);
             }
             
-            isUpdatingRef.current = false;
+            // Reset the flag after a short delay to allow the update to propagate
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 50);
         },
         getMarkdown: () => {
-            if (!viewRef.current) return '';
-            return defaultMarkdownSerializer.serialize(viewRef.current.state.doc);
+            if (!crepeRef.current || !isReady) return '';
+            try {
+                return crepeRef.current.getMarkdown();
+            } catch (error) {
+                console.error('Error getting markdown:', error);
+                return '';
+            }
         },
         insertText: (text: string) => {
-            if (!viewRef.current) return;
-            const { state, dispatch } = viewRef.current;
-            const tr = state.tr.insertText(text);
-            dispatch(tr);
+            if (!crepeRef.current || !isReady) return;
+            try {
+                // Use the insert macro to insert text at cursor position
+                crepeRef.current.editor.action(insert(text, true));
+            } catch (error) {
+                console.error('Error inserting text:', error);
+            }
         }
-    }));
+    }), [isReady]);
 
     useEffect(() => {
-        if (!editorRef.current) return;
+        if (!editorContainerRef.current) return;
 
-        const state = EditorState.create({
-            doc: defaultMarkdownParser.parse(initialContent),
-            plugins: exampleSetup({ schema })
+        // Create Crepe editor instance
+        const crepe = new Crepe({
+            root: editorContainerRef.current,
+            defaultValue: initialContent,
         });
 
-        const view = new EditorView(editorRef.current, {
-            state,
-            dispatchTransaction(transaction) {
-                const newState = view.state.apply(transaction);
-                view.updateState(newState);
-                
-                if (transaction.docChanged && !isUpdatingRef.current && onChange) {
-                    const markdown = defaultMarkdownSerializer.serialize(newState.doc);
+        // Register event listeners for content changes
+        crepe.on((listener) => {
+            listener.markdownUpdated((ctx, markdown) => {
+                // Only trigger onChange if this wasn't an external update
+                if (!isUpdatingRef.current && onChange) {
                     onChange(markdown);
                 }
-            }
+            });
         });
 
-        viewRef.current = view;
+        crepeRef.current = crepe;
+
+        // Create the editor
+        crepe.create().then(() => {
+            setIsReady(true);
+            console.log('Milkdown editor created');
+        }).catch((error) => {
+            console.error('Error creating Milkdown editor:', error);
+        });
 
         return () => {
-            view.destroy();
+            crepe.destroy();
+            crepeRef.current = null;
+            setIsReady(false);
         };
     }, []); // Run once on mount
 
     return (
-        <div className="prosemirror-editor-wrapper border rounded-md p-4 min-h-[300px] bg-white text-black">
-            <style jsx global>{`
-                .ProseMirror {
-                    outline: none;
-                    line-height: 1.5;
-                }
-                .ProseMirror h1 {
-                    font-size: 2em;
-                    font-weight: bold;
-                    margin-top: 0.67em;
-                    margin-bottom: 0.67em;
-                }
-                .ProseMirror h2 {
-                    font-size: 1.5em;
-                    font-weight: bold;
-                    margin-top: 0.83em;
-                    margin-bottom: 0.83em;
-                }
-                .ProseMirror h3 {
-                    font-size: 1.17em;
-                    font-weight: bold;
-                    margin-top: 1em;
-                    margin-bottom: 1em;
-                }
-                .ProseMirror ul {
-                    list-style-type: disc;
-                    padding-left: 40px;
-                    margin-top: 1em;
-                    margin-bottom: 1em;
-                }
-                .ProseMirror ol {
-                    list-style-type: decimal;
-                    padding-left: 40px;
-                    margin-top: 1em;
-                    margin-bottom: 1em;
-                }
-                .ProseMirror li {
-                    display: list-item;
-                }
-                .ProseMirror blockquote {
-                    border-left: 4px solid #ccc;
-                    margin-left: 0;
-                    padding-left: 1em;
-                    color: #666;
-                }
-                .ProseMirror pre {
-                    background-color: #f5f5f5;
-                    padding: 1em;
-                    border-radius: 4px;
-                    font-family: monospace;
-                }
-                .ProseMirror code {
-                    background-color: #f5f5f5;
-                    padding: 0.2em 0.4em;
-                    border-radius: 3px;
-                    font-family: monospace;
-                }
-            `}</style>
-            <div ref={editorRef} />
+        <div className="milkdown-editor-wrapper border rounded-md p-4 min-h-[300px] bg-white text-black">
+            <div ref={editorContainerRef} className="milkdown-container" />
         </div>
     );
 });

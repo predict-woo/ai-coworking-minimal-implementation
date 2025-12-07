@@ -11,14 +11,16 @@ Date: ${new Date().toLocaleDateString()}
 Attendees: 
 
 ## Agenda
-1. 
-2. 
+1. Agenda 1
+2. Agenda 2
 
 ## Discussion Points
-- 
+- discussion point 1
+- discussion point 2
 
 ## Action Items
-- [ ] 
+- [ ] action item 1
+- [ ] action item 2
 `;
 
 export default function EditorPage() {
